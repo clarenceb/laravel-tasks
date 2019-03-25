@@ -1,0 +1,17 @@
+See: https://docs.microsoft.com/en-us/azure/app-service/containers/tutorial-php-mysql-app
+
+# Pre-requisities
+- PHP 7.2
+- php-mbstring package
+
+# Install dependencies
+php ../composer.phar install
+
+# create .env file for local dev
+
+# Migrate db
+php artisan migrate
+php artisan key:generate
+
+# Start the application
+php artisan serve

@@ -60,3 +60,4 @@ docker volume rm laravel-tasks_mydata
 # Deploy to AKS
 - mount secret as a .env.production file and update command to include --env=production
 - Alternatively, pass secret as ENV variables (see docker-compose.yml as an example of the variables)
+

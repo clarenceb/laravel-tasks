@@ -1,17 +1,62 @@
-See: https://docs.microsoft.com/en-us/azure/app-service/containers/tutorial-php-mysql-app
+## Laravel Tasks App
+## -----------------
 
-# Pre-requisities
-- PHP 7.2
-- php-mbstring package
+## https://docs.microsoft.com/en-us/azure/app-service/containers/tutorial-php-mysql-app
 
-# Install dependencies
-php ../composer.phar install
+# Create MySQL
+az mysql server create --resource-group edithcowanuni --name ecu-mysqldb --location australiaeast --admin -user myadmin --admin-password P@ssw0rd123 --sku-name B_Gen5_1
+                                                                                                         
+az mysql server firewall-rule create --name AllowLocalClient --server ecu-mysqldb --resource-group edithcowanuni --start-ip-address=119.17.34.141 --end-ip-address=119.17.34.141
 
-# create .env file for local dev
+mysql -u myadmin@ecu-mysqldb -h ecu-mysqldb.mysql.database.azure.com -P 3306 -p
 
-# Migrate db
-php artisan migrate
-php artisan key:generate
+# Migrate DB
+CREATE DATABASE sampledb;
+CREATE USER 'phpappuser' IDENTIFIED BY 'MySQLAzure2017'; 
+GRANT ALL PRIVILEGES ON sampledb.* TO 'phpappuser';
+quit
 
-# Start the application
-php artisan serve
+# Create a .env.production file
+
+# Run app locally
+php artisan migrate --env=production --force
+php artisan key:generate --env=production --force
+php artisan serve --env=production
+
+# Deploy to App Service (git deploy)
+az webapp deployment user set --user-name appdevuser-ecu --password P@ssw0rd123
+az webapp create --resource-group edithcowanuni --plan edithcowanuni --name laravel-tasks-ecu --runtime "PHP|7.0" --deployment-local-git
+
+# Local git is configured with url of 'https://appdevuser-ecu@laravel-tasks-ecu.scm.azurewebsites.net/laravel-tasks-ecu.git'
+az webapp config appsettings set --name laravel-tasks-ecu --resource-group edithcowanuni --settings DB_HOST="ecu-mysqldb.mysql.database.azure.com" DB_DATABASE="sampledb" DB_USERNAME="phpappuser@ecu-mysqldb" DB_PASSWORD="MySQLAzure2017" MYSQL_SSL="true"
+php artisan key:generate --env=production --show
+az webapp config appsettings set --name laravel-tasks-ecu --resource-group edithcowanuni --settings APP_KEY="base64:agVQXvzFljsRSDzfbjbjw8QBXT+80YAXZw/QBe4i8c8=" APP_DEBUG="true"
+git remote add azure https://appdevuser-ecu@laravel-tasks-ecu.scm.azurewebsites.net/laravel-tasks-ecu.git
+git add .
+git commit -m "Commit msg"
+git push azure master
+
+# Build Docker Image
+docker build -t laravel-tasks-ecu:1.0.0 .
+
+# Run container locally with Docker Compose
+docker-compose up -d
+
+# Migrate DB
+docker-compose exec app php artisan migrate --force
+
+# Access web app
+Browse to: http://localhost:8000
+
+# Tear down app
+docker-compose down
+
+# Clean up db volume (to remove state)
+docker volume rm laravel-tasks_mydata
+
+# Deplot to App Service
+- Remove the MYSQL bit, use App Settings for the env variables
+
+# Deploy to AKS
+- mount secret as a .env.production file and update command to include --env=production
+- Alternatively, pass secret as ENV variables (see docker-compose.yml as an example of the variables)

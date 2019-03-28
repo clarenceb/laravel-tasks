@@ -36,11 +36,12 @@ git add .
 git commit -m "Commit msg"
 git push azure master
 
-# Build Docker Image
-docker build -t laravel-tasks-ecu:1.0.0 .
+# Build Docker Image for custom php-fpm
+docker build -t php-fpm -f Dockerfile.php-fpm .
 
 # Run container locally with Docker Compose
 docker-compose up -d
+docker-compose logs -f
 
 # Migrate DB
 docker-compose exec app php artisan migrate --force
@@ -54,10 +55,8 @@ docker-compose down
 # Clean up db volume (to remove state)
 docker volume rm laravel-tasks_mydata
 
-# Deplot to App Service
-- Remove the MYSQL bit, use App Settings for the env variables
+# Deploy to App Service
 
-# Deploy to AKS
-- mount secret as a .env.production file and update command to include --env=production
-- Alternatively, pass secret as ENV variables (see docker-compose.yml as an example of the variables)
-
+- Create a Linux app service plan
+- Create a multi-container web app
+- Set the environment variables needed by the docker-compose.appsvc.yml file in the Web App appsettings

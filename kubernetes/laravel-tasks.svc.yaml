@@ -5,7 +5,7 @@ metadata:
   labels:
     name: laravel-tasks
 spec:
-  type: LoadBalancer
+  type: LoadBalancer  # Use ClusterIP if using Ingress to save a public IP
   ports:
   - name: http
     port: 8888

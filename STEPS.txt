@@ -60,3 +60,19 @@ docker volume rm laravel-tasks_mydata
 - Create a Linux app service plan
 - Create a multi-container web app
 - Set the environment variables needed by the docker-compose.appsvc.yml file in the Web App appsettings
+
+# Deploy to AKS
+
+Create AKS cluster
+Configure kubectl
+
+Then:
+
+kubectl apply -f azure-file-pvc.yaml
+kubectl apply -f azure-file-sc.yaml
+kubectl apply -f azure-pvc-roles.yaml
+kubectl apply -f laravel-tasks.deploy.yaml
+kubectl apply -f laravel-tasks.svc.yaml
+
+# Ingress requires setting up Ingress Controller
+kubectl apply -f laravel-tasks.ingress.yaml

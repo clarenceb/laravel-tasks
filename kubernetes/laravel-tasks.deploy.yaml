@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: laravel-tasks-deploy
+spec:
+  selector:
+    matchLabels:
+      app: laravel-tasks
+  template:
+    metadata:
+      labels:
+        app: laravel-tasks
+    spec:
+      containers:
+        - image: nginx:1.14-alpine
+          imagePullPolicy: Always
+          name: nginx
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/srv/www/app"
+              name: phpcode
+            - mountPath: "/etc/nginx/conf.d/default.conf"
+              subPath: "default.conf"
+              name: phpcode
+        - image: acrhackfestclarence7791.azurecr.io/php-fpm:1.0.0
+          imagePullPolicy: Always
+          name: php-fpm
+          env:
+            - name: APP_ENV
+              value: "production"
+            - name: APP_DEBUG
+              value: "true"
+            - name: APP_KEY
+              value: "base64:XXXXXXXXXXXXXXXXXXX"
+            - name: DB_CONNECTION
+              value: "mysql"
+            - name: DB_HOST
+              value: "XXXXXXXXXXXXXXXXXXX"
+            - name: DB_DATABASE
+              value: "XXXXXXXXXXXXXXXXXXX"
+            - name: DB_USERNAME
+              value: "XXXXXXXXXXXXXXXXXXX"
+            - name: DB_PASSWORD
+              value: "XXXXXXXXXXXXXXXXXXX"
+            - name: MYSQL_SSL
+              value: "true"
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: "/srv/www/app"
+              name: phpcode
+      restartPolicy: Always
+      volumes:
+        - name: phpcode
+          persistentVolumeClaim:
+            claimName: azurefile
